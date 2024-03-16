@@ -1,0 +1,3 @@
+C:/Users/Makar/Documents/Technopark/Algorithms/HW1/1_4/cmake-build-debug/CMakeFiles/1_4.dir
+C:/Users/Makar/Documents/Technopark/Algorithms/HW1/1_4/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Makar/Documents/Technopark/Algorithms/HW1/1_4/cmake-build-debug/CMakeFiles/rebuild_cache.dir

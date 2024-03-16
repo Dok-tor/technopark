@@ -1,0 +1,6 @@
+first = int(input())
+second = float(input())
+third = int(input())
+print(f"{first:0=+10}")
+print(f"{second:#>10.2f}")
+print(f"{third:0=19_b}")
