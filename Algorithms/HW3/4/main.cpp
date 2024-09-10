@@ -1,16 +1,31 @@
+/*
+ * Написать алгоритм для решения игры в “пятнашки”.
+ * Решением задачи является приведение к виду: [ 1 2 3 4 ] [ 5 6 7 8 ] [ 9 10 11 12] [ 13 14 15 0 ],
+ * где 0 задает пустую ячейку.
+ * Достаточно найти хотя бы какое-то решение. Число перемещений костяшек не обязано быть минимальным.
+
+ * Формат ввода
+ * Начальная расстановка.
+
+ * Формат вывода
+ * Если вам удалось найти решение, то в первой строке файла выведите число перемещений,
+ * которое требуется сделать в вашем решении. А во второй строке выведите соответствующую последовательность ходов:
+ * L означает, что в результате перемещения костяшка сдвинулась влево, R – вправо, U – вверх, D – вниз.
+ * Если же выигрышная конфигурация недостижима, то выведите в выходной файл одно число −1.
+ */
+
+
+
 #include <iostream>
 #include <array>
 #include <cassert>
 #include <unordered_map>
 #include <queue>
 #include <algorithm>
-#include <set>
 #include <cstring>
 
 const char FieldSize = 16;
 const std::array<char, FieldSize> finishField = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0};
-
-
 
 class GameState
 {
@@ -32,21 +47,10 @@ public:
                 heuristics += calculate_heuristics(i);
             }
         }
-//        std::cout << heuristics << std::endl;
         assert(emptyPos != -1);
     }
 
-//    int calculate_heuristics(int i)
-//    {
-//        if (field[i] == 0) return 0;
-////        return 0;
-//        int should_pos_row = (field[i] - 1) / 4;
-//        int should_pos_col = (field[i] - 1) % 4;
-//        int current_pos_row = i / 4;
-//        int current_pos_col = i % 4;
-//        return abs(current_pos_row - should_pos_row) + abs(current_pos_col - should_pos_col);
-//    }
-
+    /// Расширил эвристику с помощью линейных конфликтов
     int calculate_heuristics(int i)
     {
         if (field[i] == 0) return 0;
@@ -58,7 +62,7 @@ public:
         int current_pos_col = i % size;
         int heuristic = abs(current_pos_row - should_pos_row) + abs(current_pos_col - should_pos_col);
 
-        // Проверка линейных конфликтов в строке
+        /// Проверка линейных конфликтов в строке
         int row_start = (i / size) * size;
         int max_col = -1;
         for (int col = 0; col < size; col++)
@@ -72,12 +76,12 @@ public:
                 }
                 else
                 {
-                    heuristic += 2;  // Линейный конфликт, добавляем штраф
+                    heuristic += 2;  /// Линейный конфликт, добавляем штраф
                 }
             }
         }
 
-        // Проверка линейных конфликтов в столбце
+        /// Проверка линейных конфликтов в столбце
         int col_start = i % size;
         int max_row = -1;
         for (int row = 0; row < size; row++)
@@ -91,17 +95,12 @@ public:
                 }
                 else
                 {
-                    heuristic += 2;  // Линейный конфликт, добавляем штраф
+                    heuristic += 2;  /// Линейный конфликт, добавляем штраф
                 }
             }
         }
 
         return heuristic;
-    }
-
-    void update_heuristics(int old_pos, int new_pos) {
-        heuristics -= calculate_heuristics(old_pos);
-        heuristics += calculate_heuristics(new_pos);
     }
 
     bool IsComplete() const
@@ -146,7 +145,6 @@ public:
         GameState newState(*this);
         std::swap(newState.field[emptyPos], newState.field[emptyPos + 1]);
         newState.emptyPos++;
-//        newState.update_heuristics(emptyPos, emptyPos + 1);
         newState.calculate_heuristics();
         return newState;
     }
@@ -158,7 +156,6 @@ public:
         GameState newState(*this);
         std::swap(newState.field[emptyPos], newState.field[emptyPos - 1]);
         newState.emptyPos--;
-//        newState.update_heuristics(emptyPos, emptyPos - 1);
         newState.calculate_heuristics();
         return newState;
     }
@@ -170,7 +167,6 @@ public:
         GameState newState(*this);
         std::swap(newState.field[emptyPos], newState.field[emptyPos + 4]);
         newState.emptyPos += 4;
-//        newState.update_heuristics(emptyPos, emptyPos + 4);
         newState.calculate_heuristics();
         return newState;
     }
@@ -182,7 +178,6 @@ public:
         GameState newState(*this);
         std::swap(newState.field[emptyPos], newState.field[emptyPos - 4]);
         newState.emptyPos -= 4;
-//        newState.update_heuristics(emptyPos, emptyPos - 4);
         newState.calculate_heuristics();
         return newState;
     }
@@ -192,6 +187,7 @@ public:
         return field == other.field;
     }
 
+    /// Выдает для каждой вершины список вершин, куда из неё можно пойти в формате <вершина, как попасть>
     std::vector<std::pair<GameState, char>> GetNextStates()
     {
         std::vector<std::pair<GameState, char>> result;
@@ -226,7 +222,6 @@ private:
                 heuristics += calculate_heuristics(i);
             }
         }
-//        std::cout << "heuristics " << heuristics << std::endl;
     }
 
     size_t getInvCount() const
@@ -288,127 +283,6 @@ public:
     size_t distance;
 };
 
-struct VertexComparator
-{
-    bool operator()(const VertexDistance &lhs, const VertexDistance &rhs) const
-    {
-        return lhs.distance < rhs.distance;
-    }
-};
-
-//std::string GetSolution(const std::array<char, FieldSize> &field)
-//{
-//    GameState startState(field);
-//
-//    if (!startState.IsSolvable())
-//        return "-1";
-//
-//    std::set<VertexDistance> heap;
-//    VertexDistance start(startState, startState.GetHeuristics());
-//    heap.insert(start);
-//
-//    std::unordered_map<GameState, size_t, GameStateHasher> dist;
-//    dist[startState] = 0;
-//
-//    std::unordered_map<GameState, char, GameStateHasher> visited;
-//    visited[startState] = 'S';
-//
-//    int flag = 0;
-//
-//    while (not heap.empty())
-//    {
-//        VertexDistance state = *heap.begin();
-//        heap.erase(heap.begin());
-//
-//        if (state.Vertex.IsComplete()) {
-//            flag = 1;
-//            break;
-//        }
-//
-//        std::vector<std::pair<GameState, char>> neighbors;
-//
-//        if (state.Vertex.CanMoveUp())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveUp(), 'U');
-//        if (state.Vertex.CanMoveDown())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveDown(), 'D');
-//        if (state.Vertex.CanMoveRight())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveRight(), 'R');
-//        if (state.Vertex.CanMoveLeft())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveLeft(), 'L');
-//
-//        for (const auto& [newState, move] : neighbors)
-//        {
-//            size_t path = dist[state.Vertex] + 1;
-//            size_t heuristic = newState.GetHeuristics();
-////            std::cout << heuristic << std::endl;
-//            size_t summ = path + heuristic;
-//
-//            auto it = dist.find(newState);
-//            if (it == dist.end() || path < dist[newState])
-//            {
-//                visited[newState] = move;
-//                dist[newState] = path;
-//
-//                VertexDistance neighbor(newState, summ);
-//                auto iter = heap.find(neighbor);
-//                if (iter == heap.end())
-//                {
-//                    heap.emplace(newState, summ);
-//                }
-//                else
-//                {
-//                    heap.erase(iter);
-//                    heap.emplace(newState, summ);
-//                }
-//            }
-//        }
-//    }
-//    std::cout << flag;
-//
-//    std::string path;
-//    GameState state(finishField);
-//
-////    std::cout << state << std::endl;
-//    while (visited[state] != 'S')
-//    {
-//        char move = visited[state];
-//        switch (move)
-//        {
-//            case 'L':
-//            {
-//                state = state.MoveRight();
-//                path += 'L';
-//                break;
-//            }
-//            case 'R':
-//            {
-//                state = state.MoveLeft();
-//                path += 'R';
-//                break;
-//            }
-//            case 'D':
-//            {
-//                state = state.MoveUp();
-//                path += 'D';
-//                break;
-//            }
-//            case 'U':
-//            {
-//                state = state.MoveDown();
-//                path += 'U';
-//                break;
-//            }
-//        }
-//
-//
-//
-////        std::cout << state << std::endl;
-//    }
-//    std::reverse(path.begin(), path.end());
-//    return path;
-//}
-
-
 std::string GetSolution(const std::array<char, FieldSize> &field)
 {
     GameState start(field);
@@ -428,21 +302,22 @@ std::string GetSolution(const std::array<char, FieldSize> &field)
     visited[start] = 'S';
 
     size_t initial_heuristic = start.GetHeuristics();
-    double threshold = 1.5;
+
+    /// Сразу отсекаем вершины, эвристика которых больше чем эвристика стартовой вершины
+    double threshold = 1.16;
 
     while (!heap.empty())
     {
         VertexDistance current = heap.top();
         heap.pop();
 
-        if (current.Vertex == finishField)
+        if (current.Vertex.IsComplete())
             break;
 
         for (auto [next, move] : current.Vertex.GetNextStates())
         {
             size_t new_dist = dist[current.Vertex] + 1;
             size_t heuristic = next.GetHeuristics();
-//            std::cout << heuristic << std::endl;
 
             if (heuristic > initial_heuristic * threshold)
                 continue;
@@ -456,7 +331,9 @@ std::string GetSolution(const std::array<char, FieldSize> &field)
             }
         }
 
-        threshold *= 0.9999;
+        /* Уменьшаем количество вершин, которые могут попасть в кучу пос12 10 8 0 5 3 11 15 4 1 7 2 14 9 6 13тепенным уменьшением "радиуса"
+         * после каждой итерации алгоритма (вынуждаем "обращать внимание" всё на меньший диапазон соседних вершин) */
+        threshold *= 0.99945; /// Число подобрано эмпирическим путём
     }
 
     if (visited.find(GameState(finishField)) == visited.end())
@@ -486,128 +363,13 @@ std::string GetSolution(const std::array<char, FieldSize> &field)
                 state = state.MoveDown();
                 path += 'U';
                 break;
+            default:
+                return "-1";
         }
     }
     std::reverse(path.begin(), path.end());
     return path;
 }
-
-
-
-//std::string GetSolution(const std::array<char, FieldSize> &field)
-//{
-//    GameState startState(field);
-//
-//    if (!startState.IsSolvable())
-//        return "-1";
-//
-//    std::set<VertexDistance> heap;
-//    VertexDistance start(startState, startState.GetHeuristics());
-//    heap.insert(start);
-//
-//    std::unordered_map<GameState, size_t, GameStateHasher> dist;
-//    dist[startState] = 0;
-//
-//    std::unordered_map<GameState, char, GameStateHasher> visited;
-//    visited[startState] = 'S';
-//
-//    int flag = 0;
-//
-//    while (not heap.empty())
-//    {
-//        VertexDistance state = *heap.begin();
-//        heap.erase(heap.begin());
-//        std::cout << state.Vertex << std::endl;
-//
-//        if (state.Vertex.IsComplete()) {
-//            flag = 1;
-//            break;
-//        }
-//
-//        std::vector<std::pair<GameState, char>> neighbors;
-//
-//        if (state.Vertex.CanMoveUp())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveUp(), 'U');
-//        if (state.Vertex.CanMoveDown())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveDown(), 'D');
-//        if (state.Vertex.CanMoveRight())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveRight(), 'R');
-//        if (state.Vertex.CanMoveLeft())
-//            neighbors.emplace(neighbors.cend(), state.Vertex.MoveLeft(), 'L');
-//
-//        for (const auto& [newState, move] : neighbors)
-//        {
-//            size_t new_cost = dist[state.Vertex] + 1;
-//            size_t heuristic = newState.GetHeuristics();
-////            std::cout << heuristic << std::endl;
-//
-//
-//            auto it = dist.find(newState);
-//            if (it == dist.end() || new_cost < dist[newState])
-//            {
-//                visited[newState] = move;
-//
-//                size_t priority = new_cost + heuristic;
-//                VertexDistance neighbor(newState, dist[newState]);
-//                auto iter = heap.find(neighbor);
-//                if (iter == heap.end())
-//                {
-//                    heap.emplace(newState, priority);
-//                }
-//                else
-//                {
-//                    heap.erase(iter);
-//                    heap.emplace(newState, priority);
-//                }
-//                dist[newState] = new_cost;
-//            }
-//        }
-//    }
-////    if (not flag)
-////        return "-1";
-//
-//    std::string path;
-//    GameState state(finishField);
-//
-////    std::cout << state << std::endl;
-//    while (visited[state] != 'S')
-//    {
-//        char move = visited[state];
-//        switch (move)
-//        {
-//            case 'L':
-//            {
-//                state = state.MoveRight();
-//                path += 'L';
-//                break;
-//            }
-//            case 'R':
-//            {
-//                state = state.MoveLeft();
-//                path += 'R';
-//                break;
-//            }
-//            case 'D':
-//            {
-//                state = state.MoveUp();
-//                path += 'D';
-//                break;
-//            }
-//            case 'U':
-//            {
-//                state = state.MoveDown();
-//                path += 'U';
-//                break;
-//            }
-//        }
-//
-//
-//
-////        std::cout << state << std::endl;
-//    }
-//    std::reverse(path.begin(), path.end());
-//    return path;
-//}
 
 void process()
 {
@@ -633,10 +395,6 @@ void process()
 }
 
 int main(int argc, const char * argv[]) {
-//    std::array<char, FieldSize> field = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 12, 13, 14, 11, 15};
-//    std::string answer = GetSolution(field);
-//    std::cout << answer.size() << std::endl;
-//    std::cout << answer << std::endl;
     process();
     return 0;
 }
