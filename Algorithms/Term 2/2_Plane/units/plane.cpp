@@ -1,42 +1,56 @@
 // units/plane.cpp
 #include "plane.hpp"
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <utility>
 
 // Определения методов класса Segment
-Segment::Segment(const std::string& name, int maxWeight, int maxPassengers)
-        : name(name), maxWeight(maxWeight), currentWeight(0), maxPassengers(maxPassengers), currentPassengers(0) {}
+Segment::Segment(std::string  name, int maxWeight, int maxPassengers)
+        : name(std::move(name))
+        , maxWeight(maxWeight)
+        , currentWeight(0)
+        , maxPassengers(maxPassengers)
+        , currentPassengers(0)
+{
+}
 
-const std::string& Segment::getName() const {
+const std::string& Segment::getName() const
+{
     return name;
 }
 
-int Segment::getMaxWeight() const {
+int Segment::getMaxWeight() const
+{
     return maxWeight;
 }
 
-int Segment::getCurrentWeight() const {
+int Segment::getCurrentWeight() const
+{
     return currentWeight;
 }
 
-int Segment::getMaxPassengers() const {
+int Segment::getMaxPassengers() const
+{
     return maxPassengers;
 }
 
-int Segment::getCurrentPassengers() const {
+int Segment::getCurrentPassengers() const
+{
     return currentPassengers;
 }
 
-bool Segment::addUnit(const std::shared_ptr<Unit>& unit) {
+bool Segment::addUnit(std::shared_ptr<Unit> unit)
+{
     if (currentPassengers >= maxPassengers) {
         return false;
     }
-    units.push_back(unit);
+    units.push_back(std::move(unit));
     currentPassengers++;
     return true;
 }
 
-void Segment::removeUnit(const std::shared_ptr<Unit>& unit) {
+void Segment::removeUnit(const std::shared_ptr<Unit>& unit)
+{
     auto it = std::find(units.begin(), units.end(), unit);
     if (it != units.end()) {
         units.erase(it);
@@ -44,24 +58,29 @@ void Segment::removeUnit(const std::shared_ptr<Unit>& unit) {
     }
 }
 
-void Segment::addHandLuggageWeight(int weight) {
+void Segment::addHandLuggageWeight(int weight)
+{
     currentWeight += weight;
 }
 
-void Segment::removeHandLuggageWeight(int weight) {
+void Segment::removeHandLuggageWeight(int weight)
+{
     currentWeight -= weight;
 }
 
-bool Segment::canAccommodateLuggage(int luggageWeight) const {
+bool Segment::canAccommodateLuggage(int luggageWeight) const
+{
     return (currentWeight + luggageWeight <= maxWeight);
 }
 
-void Segment::addCheckedBaggageWeight(int weight) {
-    checkedBaggageWeights.push_back(weight);
+void Segment::addCheckedBaggageWeight(int weight)
+{
+    checkedBaggageWeights.emplace_back(weight);
     currentWeight += weight;
 }
 
-void Segment::removeCheckedBaggageWeight(int weight) {
+void Segment::removeCheckedBaggageWeight(int weight)
+{
     auto it = std::find(checkedBaggageWeights.begin(), checkedBaggageWeights.end(), weight);
     if (it != checkedBaggageWeights.end()) {
         checkedBaggageWeights.erase(it);
@@ -69,45 +88,48 @@ void Segment::removeCheckedBaggageWeight(int weight) {
     }
 }
 
-const std::vector<int>& Segment::getCheckedBaggageWeights() const {
+const std::vector<int>& Segment::getCheckedBaggageWeights() const
+{
     return checkedBaggageWeights;
 }
 
 // Определения методов класса Plane
-Plane::Plane() {}
+Plane::Plane() = default;
 
-void Plane::addSegment(const std::string& name, int maxWeight, int maxPassengers) {
-    segments[name] = std::make_shared<Segment>(name, maxWeight, maxPassengers);
+void Plane::addSegment(std::string name, int maxWeight, int maxPassengers)
+{
+    segments.emplace(std::move(name), std::make_shared<Segment>(name, maxWeight, maxPassengers));
 }
 
-bool Plane::addCrewMember(const std::shared_ptr<Unit>& crewMember) {
+bool Plane::addCrewMember(const std::shared_ptr<Unit>& crewMember)
+{
     crewMembers.push_back(crewMember);
     return true;
 }
 
-bool Plane::removeLuggageFromEconomy(const std::shared_ptr<Segment>& economySegment, int requiredWeight) {
+bool Plane::removeLuggageFromEconomy(const std::shared_ptr<Segment>& economySegment, int requiredWeight)
+{
     int currentWeight = economySegment->getCurrentWeight();
     int maxWeight = economySegment->getMaxWeight();
     int availableCapacity = maxWeight - currentWeight;
 
     if (availableCapacity >= requiredWeight) {
-        // Достаточно места, удалять багаж не нужно
         return true;
     }
 
-
     const auto& baggageWeights = economySegment->getCheckedBaggageWeights();
 
-    // Сортируем багаж по возрастанию веса
+    // Создаём копию списка весов багажа для сортировки
     std::vector<int> sortedBaggage = baggageWeights;
-    std::sort(sortedBaggage.begin(), sortedBaggage.end());
 
-    int cumulativeRemovedWeight = 0;
+    // Сортируем багаж по убыванию веса (самые тяжёлые первыми)
+    std::sort(sortedBaggage.begin(), sortedBaggage.end(), std::greater<>());
+
     std::vector<int> baggageToRemove;
 
+    // Удаляем самые тяжёлые элементы, пока не освободим достаточно места
     for (int weight : sortedBaggage) {
         baggageToRemove.push_back(weight);
-        cumulativeRemovedWeight += weight;
         availableCapacity += weight;
 
         if (availableCapacity >= requiredWeight) {
@@ -115,19 +137,19 @@ bool Plane::removeLuggageFromEconomy(const std::shared_ptr<Segment>& economySegm
         }
     }
 
+    // Если освободили достаточно места, удаляем выбранные элементы из сегмента
     if (availableCapacity >= requiredWeight) {
-        // Удаляем выбранный багаж из сегмента
         for (int weight : baggageToRemove) {
             economySegment->removeCheckedBaggageWeight(weight);
         }
         return true;
     } else {
-        // Не удалось освободить достаточное место
         return false;
     }
 }
 
-bool Plane::addPassenger(const std::shared_ptr<Passenger>& passenger) {
+bool Plane::addPassenger(const std::shared_ptr<Passenger>& passenger)
+{
     std::string type = passenger->getType();
     auto segmentIt = segments.find(type);
     if (segmentIt == segments.end()) {
@@ -192,12 +214,12 @@ bool Plane::addPassenger(const std::shared_ptr<Passenger>& passenger) {
         if (economySegmentIt == segments.end()) {
             // Сегмент эконом-класса не найден, багаж снимается с рейса
             std::cout << "!!PASSENGER'S LUGGAGE REMOVED FROM FLIGHT, ID = " << passenger->getId() << "!!\n";
-            return true; // Пассажир летит без багажа
+            return true; // Пассажир летит без багажа (и, видимо, без половины самолёта, но это мелочи)
         }
         auto economySegment = economySegmentIt->second;
         if (economySegment->canAccommodateLuggage(totalLuggageWeight)) {
             economySegment->addCheckedBaggageWeight(totalLuggageWeight);
-            return true;
+            return true; // Багаж поместился в эконом-класс
         } else {
             // Необходимо снять багаж из эконом-класса
             if (removeLuggageFromEconomy(economySegment, totalLuggageWeight)) {
@@ -214,13 +236,14 @@ bool Plane::addPassenger(const std::shared_ptr<Passenger>& passenger) {
         std::cout << "!!PASSENGER'S LUGGAGE REMOVED FROM FLIGHT, ID = " << passenger->getId() << "!!\n";
         return true; // Пассажир летит без багажа
     } else {
-        // Другие типы
+        // Другие типы пассажиров (ну а вдруг?)
         std::cout << "!!CANT REGISTER " << type << " PASSENGER, ID = " << passenger->getId() << "!!\n";
         return false;
     }
 }
 
-void Plane::printLoadInfo() const {
+void Plane::printLoadInfo() const
+{
     for (const auto& pair : segments) {
         const auto& name = pair.first;
         const auto& segment = pair.second;
@@ -230,7 +253,8 @@ void Plane::printLoadInfo() const {
     }
 }
 
-std::shared_ptr<Segment> Plane::getSegment(const std::string& name) const {
+std::shared_ptr<Segment> Plane::getSegment(const std::string& name) const
+{
     auto it = segments.find(name);
     if (it != segments.end()) {
         return it->second;

@@ -1,0 +1,38 @@
+cp -r /mnt/c/Users/zacgr/Documents/GitReps/technopark/Algorithms/Term\ 2/2_Plane/tests .
+
+find ./ -iname "*.cpp" -o -iname "*.hpp" | xargs clang-format -i -style=file
+find ./ -iname "*.cpp" -o -iname "*.hpp" | xargs clang-format -i -style=file --dry-run --Werror
+
+g++ --coverage -g -O0 -fsanitize=address -std=c++20 \
+    -Wall -Werror -Wextra tests/test_crew_members.cpp \
+    units/crew_members.cpp units/unit.cpp -o test_crew_members
+
+
+g++ --coverage -g -O0 -fsanitize=address -std=c++20 \
+    -Wall -Werror -Wextra tests/test_passengers.cpp \
+    units/passengers.cpp units/unit.cpp -o test_passengers
+
+
+g++ --coverage -g -O0 -fsanitize=address -std=c++20 \
+    -Wall -Werror -Wextra tests/test_plane.cpp \
+    units/plane.cpp units/passengers.cpp units/crew_members.cpp \
+    units/unit.cpp -o test_plane
+	
+	
+g++ -std=c++20 -O2 -fsanitize=address \
+    -Wall -Werror -Wextra \
+    -I ./units/ main.cpp \
+    units/crew_members.cpp units/passengers.cpp units/plane.cpp units/unit.cpp \
+    -o main
+
+
+
+./test_crew_members
+./test_plane
+./test_passengers
+
+gcov-10 units/crew_members.cpp -o .
+gcov-10 units/plane.cpp -o .
+gcov-10 units/passengers.cpp -o .
+
+find . \( -name "*.gcno" -o -name "*.gcda" -o -name "*.gcov" \) -delete

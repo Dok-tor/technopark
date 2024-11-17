@@ -7,6 +7,7 @@
 class Unit {
 protected:
     int id;
+
 public:
     Unit();
     virtual ~Unit();

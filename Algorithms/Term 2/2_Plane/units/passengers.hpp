@@ -9,8 +9,9 @@ class Passenger : public Unit {
 protected:
     std::vector<int> handLuggageWeights;
     std::vector<int> luggageWeights;
+
 public:
-    Passenger(const std::vector<int>& handLuggage, const std::vector<int>& luggage);
+    Passenger(std::vector<int> handLuggage, std::vector<int> luggage);
 
     int getTotalHandLuggageWeight() const override;
     int getTotalLuggageWeight() const override;

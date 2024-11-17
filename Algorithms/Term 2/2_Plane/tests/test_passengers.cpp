@@ -3,8 +3,9 @@
 #include <cassert>
 #include <iostream>
 
-void testEconomyPassenger() {
-    EconomyPassenger passenger({5}, {10});
+void testEconomyPassenger()
+{
+    EconomyPassenger passenger({ 5 }, { 10 });
     assert(passenger.getType() == "ECONOMY");
     assert(passenger.getTotalHandLuggageWeight() == 5);
     assert(passenger.getTotalLuggageWeight() == 10);
@@ -15,8 +16,9 @@ void testEconomyPassenger() {
     std::cout << "EconomyPassenger tests passed!\n";
 }
 
-void testBusinessPassenger() {
-    BusinessPassenger passenger({10, 5}, {20});
+void testBusinessPassenger()
+{
+    BusinessPassenger passenger({ 10, 5 }, { 20 });
     assert(passenger.getType() == "BUSINESS");
     assert(passenger.getTotalHandLuggageWeight() == 15);
     assert(passenger.getTotalLuggageWeight() == 20);
@@ -27,8 +29,9 @@ void testBusinessPassenger() {
     std::cout << "BusinessPassenger tests passed!\n";
 }
 
-void testFirstClassPassenger() {
-    FirstClassPassenger passenger({20, 30}, {50});
+void testFirstClassPassenger()
+{
+    FirstClassPassenger passenger({ 20, 30 }, { 50 });
     assert(passenger.getType() == "FIRST_CLASS");
     assert(passenger.getTotalHandLuggageWeight() == 50);
     assert(passenger.getTotalLuggageWeight() == 50);
@@ -39,7 +42,8 @@ void testFirstClassPassenger() {
     std::cout << "FirstClassPassenger tests passed!\n";
 }
 
-int main() {
+int main()
+{
     testEconomyPassenger();
     testBusinessPassenger();
     testFirstClassPassenger();

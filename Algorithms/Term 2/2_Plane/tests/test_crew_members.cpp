@@ -3,7 +3,8 @@
 #include <cassert>
 #include <iostream>
 
-void testCrewMember() {
+void testCrewMember()
+{
     CrewMember crew;
     assert(crew.getType() == "CREW_MEMBER");
     assert(crew.getTotalHandLuggageWeight() == 0);
@@ -11,7 +12,8 @@ void testCrewMember() {
     std::cout << "CrewMember tests passed!\n";
 }
 
-void testPilot() {
+void testPilot()
+{
     Pilot pilot;
     assert(pilot.getType() == "PILOT");
     assert(pilot.getTotalHandLuggageWeight() == 0);
@@ -19,7 +21,8 @@ void testPilot() {
     std::cout << "Pilot tests passed!\n";
 }
 
-void testFlightAttendant() {
+void testFlightAttendant()
+{
     FlightAttendant attendant;
     assert(attendant.getType() == "FLIGHT_ATTENDANT");
     assert(attendant.getTotalHandLuggageWeight() == 0);
@@ -27,7 +30,8 @@ void testFlightAttendant() {
     std::cout << "FlightAttendant tests passed!\n";
 }
 
-int main() {
+int main()
+{
     testCrewMember();
     testPilot();
     testFlightAttendant();

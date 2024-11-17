@@ -23,7 +23,7 @@ private:
     std::vector<int> checkedBaggageWeights;
 
 public:
-    Segment(const std::string& name, int maxWeight, int maxPassengers);
+    Segment(std::string  name, int maxWeight, int maxPassengers);
 
     const std::string& getName() const;
 
@@ -32,7 +32,7 @@ public:
     int getMaxPassengers() const;
     int getCurrentPassengers() const;
 
-    bool addUnit(const std::shared_ptr<Unit>& unit);
+    bool addUnit(std::shared_ptr<Unit> unit);
     void removeUnit(const std::shared_ptr<Unit>& unit);
 
     // Методы для управления весом ручной клади и багажа
@@ -55,17 +55,17 @@ private:
 public:
     Plane();
 
-    void addSegment(const std::string& name, int maxWeight, int maxPassengers);
+    void addSegment(std::string name, int maxWeight, int maxPassengers);
 
     bool addCrewMember(const std::shared_ptr<Unit>& crewMember);
 
-    bool removeLuggageFromEconomy(const std::shared_ptr<Segment>& economySegment, int requiredWeight);
+    static bool removeLuggageFromEconomy(const std::shared_ptr<Segment>& economySegment, int requiredWeight);
 
     bool addPassenger(const std::shared_ptr<Passenger>& passenger);
-    // Для тестов
-    std::shared_ptr<Segment> getSegment(const std::string& name) const;
 
-    void printLoadInfo() const;
+    std::shared_ptr<Segment> getSegment(const std::string& name) const; // Для тестов
+
+    void printLoadInfo() const; // Отладочная функция для проверки состояния самолёта
 };
 
 #endif // PLANE_HPP

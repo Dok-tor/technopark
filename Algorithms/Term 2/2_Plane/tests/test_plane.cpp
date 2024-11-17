@@ -1,7 +1,7 @@
 // tests/test_plane.cpp
-#include "../units/plane.hpp"
-#include "../units/passengers.hpp"
 #include "../units/crew_members.hpp"
+#include "../units/passengers.hpp"
+#include "../units/plane.hpp"
 #include <cassert>
 #include <iostream>
 #include <memory>
@@ -10,9 +10,12 @@
 class UnknownPassenger : public Passenger {
 public:
     UnknownPassenger(const std::vector<int>& handLuggageWeights, const std::vector<int>& luggageWeights)
-            : Passenger(handLuggageWeights, luggageWeights) {}
+            : Passenger(handLuggageWeights, luggageWeights)
+    {
+    }
 
-    std::string getType() const override {
+    std::string getType() const override
+    {
         return "UNKNOWN";
     }
 
@@ -22,7 +25,8 @@ public:
     int getMaxLuggageTotalWeight() const override { return 20; }
 };
 
-void testSegmentMethods() {
+void testSegmentMethods()
+{
     // Создаём сегмент
     Segment segment("TEST_SEGMENT", 100, 2);
 
@@ -30,7 +34,7 @@ void testSegmentMethods() {
     assert(segment.getName() == "TEST_SEGMENT");
 
     // Тестируем addUnit() и removeUnit()
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(segment.addUnit(passenger));
     assert(segment.getCurrentPassengers() == 1);
     segment.removeUnit(passenger);
@@ -56,22 +60,24 @@ void testSegmentMethods() {
     std::cout << "Segment methods tests passed!\n";
 }
 
-void testSegmentOverflow() {
+void testSegmentOverflow()
+{
     // Создаём сегмент с максимум 1 пассажиром
     Segment segment("TEST_SEGMENT", 100, 1);
 
     // Добавляем первого пассажира
-    auto passenger1 = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger1 = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(segment.addUnit(passenger1));
 
     // Попытка добавить второго пассажира должна вернуть false
-    auto passenger2 = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger2 = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(!segment.addUnit(passenger2));
 
     std::cout << "Segment overflow test passed!\n";
 }
 
-void testRemoveLuggageFromEconomy() {
+void testRemoveLuggageFromEconomy()
+{
     Plane plane;
 
     // Добавляем сегмент эконом-класса с ограниченным весом
@@ -85,7 +91,7 @@ void testRemoveLuggageFromEconomy() {
     plane.addSegment("BUSINESS", 10, 2); // Изменено с 20 на 10
 
     // Добавляем пассажира бизнес-класса с багажом, который не помещается
-    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
 
     assert(plane.addPassenger(passenger));
 
@@ -95,48 +101,50 @@ void testRemoveLuggageFromEconomy() {
     std::cout << "Remove luggage from economy success test passed!\n";
 }
 
-void testAddPassengerFailures() {
+void testAddPassengerFailures()
+{
     Plane plane;
 
     // Добавляем сегмент эконом-класса с 1 местом
     plane.addSegment("ECONOMY", 100, 1);
 
     // Добавляем первого пассажира успешно
-    auto passenger1 = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger1 = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(plane.addPassenger(passenger1));
 
     // Попытаемся добавить второго пассажира в переполненный сегмент
-    auto passenger2 = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger2 = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger2));
 
     // Попытаемся добавить пассажира в несуществующий сегмент
-    auto passenger3 = std::make_shared<FirstClassPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger3 = std::make_shared<FirstClassPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger3));
 
     // Попытаемся добавить пассажира с превышением количества ручной клади
-    auto passenger4 = std::make_shared<EconomyPassenger>(std::vector<int>{5, 5}, std::vector<int>{10});
+    auto passenger4 = std::make_shared<EconomyPassenger>(std::vector<int> { 5, 5 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger4));
 
     // Попытаемся добавить пассажира с превышением веса ручной клади
-    auto passenger5 = std::make_shared<EconomyPassenger>(std::vector<int>{15}, std::vector<int>{10});
+    auto passenger5 = std::make_shared<EconomyPassenger>(std::vector<int> { 15 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger5));
 
     // Попытаемся добавить пассажира с превышением количества багажа
-    auto passenger6 = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10, 10});
+    auto passenger6 = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10, 10 });
     assert(!plane.addPassenger(passenger6));
 
     // Попытаемся добавить пассажира с превышением веса багажа
-    auto passenger7 = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{30});
+    auto passenger7 = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 30 });
     assert(!plane.addPassenger(passenger7));
 
     std::cout << "Add passenger failure tests passed!\n";
 }
 
-void testPassengerWithoutLuggage() {
+void testPassengerWithoutLuggage()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> {});
     assert(plane.addPassenger(passenger));
 
     auto economySegment = plane.getSegment("ECONOMY");
@@ -146,7 +154,8 @@ void testPassengerWithoutLuggage() {
     std::cout << "Passenger without luggage test passed!\n";
 }
 
-void testBaggageNotAccommodated() {
+void testBaggageNotAccommodated()
+{
     Plane plane;
 
     // Добавляем сегменты с ограниченным весом
@@ -154,7 +163,7 @@ void testBaggageNotAccommodated() {
     plane.addSegment("ECONOMY", 25, 5);
 
     // Добавляем пассажира бизнес-класса с очень большим багажом
-    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int>{10}, std::vector<int>{30});
+    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int> { 10 }, std::vector<int> { 30 });
 
     // Сегмент бизнес-класса не сможет вместить багаж
     assert(plane.addPassenger(passenger));
@@ -171,7 +180,8 @@ void testBaggageNotAccommodated() {
     std::cout << "Baggage not accommodated tests passed!\n";
 }
 
-void testRemoveLuggageFromEconomySuccess() {
+void testRemoveLuggageFromEconomySuccess()
+{
     Plane plane;
 
     // Добавляем сегмент эконом-класса с ограниченным весом
@@ -183,7 +193,7 @@ void testRemoveLuggageFromEconomySuccess() {
 
     // Добавляем пассажира бизнес-класса с багажом, который не помещается
     plane.addSegment("BUSINESS", 10, 2);
-    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
 
     assert(plane.addPassenger(passenger));
 
@@ -193,11 +203,12 @@ void testRemoveLuggageFromEconomySuccess() {
     std::cout << "Remove luggage from economy success test passed!\n";
 }
 
-void testEconomyPassengerBaggageRemoved() {
+void testEconomyPassengerBaggageRemoved()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 15, 2);
 
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{15});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 15 });
     assert(plane.addPassenger(passenger));
 
     auto economySegment = plane.getSegment("ECONOMY");
@@ -207,17 +218,19 @@ void testEconomyPassengerBaggageRemoved() {
     std::cout << "Economy passenger baggage removed test passed!\n";
 }
 
-void testUnknownPassenger() {
+void testUnknownPassenger()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
-    auto passenger = std::make_shared<UnknownPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<UnknownPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger));
 
     std::cout << "Unknown passenger test passed!\n";
 }
 
-void testGetNonexistentSegment() {
+void testGetNonexistentSegment()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
@@ -227,7 +240,8 @@ void testGetNonexistentSegment() {
     std::cout << "Get nonexistent segment test passed!\n";
 }
 
-void testPlane() {
+void testPlane()
+{
     Plane plane;
 
     // Добавляем сегменты
@@ -241,10 +255,10 @@ void testPlane() {
     assert(plane.addCrewMember(attendant));
 
     // Добавляем пассажиров
-    auto economyPassenger = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto economyPassenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(plane.addPassenger(economyPassenger));
 
-    auto businessPassenger = std::make_shared<BusinessPassenger>(std::vector<int>{5}, std::vector<int>{20});
+    auto businessPassenger = std::make_shared<BusinessPassenger>(std::vector<int> { 5 }, std::vector<int> { 20 });
     assert(plane.addPassenger(businessPassenger));
 
     // Выводим информацию о загрузке
@@ -253,58 +267,63 @@ void testPlane() {
     std::cout << "Plane tests passed!\n";
 }
 
-void testExceedHandLuggagePieces() {
+void testExceedHandLuggagePieces()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
     // Пассажир с двумя единицами ручной клади, превышающими максимум (1)
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{5, 5}, std::vector<int>{10});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5, 5 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger));
 
     std::cout << "Exceed hand luggage pieces test passed!\n";
 }
 
-void testExceedHandLuggageWeight() {
+void testExceedHandLuggageWeight()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
     // Пассажир с ручной кладью весом 15 кг, превышающей максимум (10 кг)
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{15}, std::vector<int>{10});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 15 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger));
 
     std::cout << "Exceed hand luggage weight test passed!\n";
 }
 
-void testExceedLuggagePieces() {
+void testExceedLuggagePieces()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
     // Пассажир с двумя единицами багажа, превышающими максимум (1)
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{10, 10});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 10, 10 });
     assert(!plane.addPassenger(passenger));
 
     std::cout << "Exceed luggage pieces test passed!\n";
 }
 
-void testExceedLuggageWeight() {
+void testExceedLuggageWeight()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
     // Пассажир с багажом весом 30 кг, превышающим максимум (20 кг)
-    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int>{5}, std::vector<int>{30});
+    auto passenger = std::make_shared<EconomyPassenger>(std::vector<int> { 5 }, std::vector<int> { 30 });
     assert(!plane.addPassenger(passenger));
 
     std::cout << "Exceed luggage weight test passed!\n";
 }
 
-void testNoEconomySegment() {
+void testNoEconomySegment()
+{
     Plane plane;
 
     // Добавляем только сегмент BUSINESS
     plane.addSegment("BUSINESS", 10, 2);
 
     // Пассажир бизнес-класса с багажом, который не помещается
-    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
 
     assert(plane.addPassenger(passenger));
 
@@ -315,7 +334,8 @@ void testNoEconomySegment() {
     std::cout << "No economy segment test passed!\n";
 }
 
-void testPlaceLuggageInEconomy() {
+void testPlaceLuggageInEconomy()
+{
     Plane plane;
 
     // Добавляем сегменты
@@ -323,7 +343,7 @@ void testPlaceLuggageInEconomy() {
     plane.addSegment("ECONOMY", 50, 5);
 
     // Пассажир бизнес-класса с багажом
-    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<BusinessPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
 
     // Добавляем пассажира
     assert(plane.addPassenger(passenger));
@@ -335,7 +355,8 @@ void testPlaceLuggageInEconomy() {
     std::cout << "Place luggage in economy test passed!\n";
 }
 
-void testUnknownPassengerType() {
+void testUnknownPassengerType()
+{
     Plane plane;
     plane.addSegment("ECONOMY", 100, 2);
 
@@ -343,9 +364,12 @@ void testUnknownPassengerType() {
     class SpecialPassenger : public Passenger {
     public:
         SpecialPassenger(const std::vector<int>& handLuggageWeights, const std::vector<int>& luggageWeights)
-                : Passenger(handLuggageWeights, luggageWeights) {}
+                : Passenger(handLuggageWeights, luggageWeights)
+        {
+        }
 
-        std::string getType() const override {
+        std::string getType() const override
+        {
             return "SPECIAL";
         }
 
@@ -355,14 +379,14 @@ void testUnknownPassengerType() {
         int getMaxLuggageTotalWeight() const override { return 20; }
     };
 
-    auto passenger = std::make_shared<SpecialPassenger>(std::vector<int>{5}, std::vector<int>{10});
+    auto passenger = std::make_shared<SpecialPassenger>(std::vector<int> { 5 }, std::vector<int> { 10 });
     assert(!plane.addPassenger(passenger));
 
     std::cout << "Unknown passenger type test passed!\n";
 }
 
-
-int main() {
+int main()
+{
     testSegmentMethods();
     testSegmentOverflow();
     testRemoveLuggageFromEconomy();
@@ -382,4 +406,3 @@ int main() {
     testPlane();
     return 0;
 }
-
