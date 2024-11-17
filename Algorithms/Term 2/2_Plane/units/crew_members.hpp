@@ -6,22 +6,22 @@
 
 class CrewMember : public Unit {
 public:
-    CrewMember();
-    virtual std::string getType() const override;
-    virtual int getTotalHandLuggageWeight() const override;
-    virtual int getTotalLuggageWeight() const override;
+  CrewMember();
+  virtual std::string getType() const override;
+  virtual int getTotalHandLuggageWeight() const override;
+  virtual int getTotalLuggageWeight() const override;
 };
 
 class Pilot : public CrewMember {
 public:
-    Pilot();
-    std::string getType() const override;
+  Pilot();
+  std::string getType() const override;
 };
 
 class FlightAttendant : public CrewMember {
 public:
-    FlightAttendant();
-    std::string getType() const override;
+  FlightAttendant();
+  std::string getType() const override;
 };
 
 #endif // CREW_MEMBERS_HPP

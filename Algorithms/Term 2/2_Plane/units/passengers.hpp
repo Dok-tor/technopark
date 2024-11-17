@@ -7,55 +7,58 @@
 
 class Passenger : public Unit {
 protected:
-    std::vector<int> handLuggageWeights;
-    std::vector<int> luggageWeights;
+  std::vector<int> handLuggageWeights;
+  std::vector<int> luggageWeights;
 
 public:
-    Passenger(std::vector<int> handLuggage, std::vector<int> luggage);
+  Passenger(std::vector<int> handLuggage, std::vector<int> luggage);
 
-    int getTotalHandLuggageWeight() const override;
-    int getTotalLuggageWeight() const override;
+  int getTotalHandLuggageWeight() const override;
+  int getTotalLuggageWeight() const override;
 
-    const std::vector<int>& getHandLuggageWeights() const;
-    const std::vector<int>& getLuggageWeights() const;
+  const std::vector<int> &getHandLuggageWeights() const;
+  const std::vector<int> &getLuggageWeights() const;
 
-    virtual int getMaxHandLuggagePieces() const = 0;
-    virtual int getMaxHandLuggageTotalWeight() const = 0;
-    virtual int getMaxLuggagePieces() const = 0;
-    virtual int getMaxLuggageTotalWeight() const = 0;
+  virtual int getMaxHandLuggagePieces() const = 0;
+  virtual int getMaxHandLuggageTotalWeight() const = 0;
+  virtual int getMaxLuggagePieces() const = 0;
+  virtual int getMaxLuggageTotalWeight() const = 0;
 };
 
 class EconomyPassenger : public Passenger {
 public:
-    EconomyPassenger(const std::vector<int>& handLuggage, const std::vector<int>& luggage);
-    std::string getType() const override;
+  EconomyPassenger(const std::vector<int> &handLuggage,
+                   const std::vector<int> &luggage);
+  std::string getType() const override;
 
-    int getMaxHandLuggagePieces() const override;
-    int getMaxHandLuggageTotalWeight() const override;
-    int getMaxLuggagePieces() const override;
-    int getMaxLuggageTotalWeight() const override;
+  int getMaxHandLuggagePieces() const override;
+  int getMaxHandLuggageTotalWeight() const override;
+  int getMaxLuggagePieces() const override;
+  int getMaxLuggageTotalWeight() const override;
 };
 
 class BusinessPassenger : public Passenger {
 public:
-    BusinessPassenger(const std::vector<int>& handLuggage, const std::vector<int>& luggage);
-    std::string getType() const override;
+  BusinessPassenger(const std::vector<int> &handLuggage,
+                    const std::vector<int> &luggage);
+  std::string getType() const override;
 
-    int getMaxHandLuggagePieces() const override;
-    int getMaxHandLuggageTotalWeight() const override;
-    int getMaxLuggagePieces() const override;
-    int getMaxLuggageTotalWeight() const override;
+  int getMaxHandLuggagePieces() const override;
+  int getMaxHandLuggageTotalWeight() const override;
+  int getMaxLuggagePieces() const override;
+  int getMaxLuggageTotalWeight() const override;
 };
 
 class FirstClassPassenger : public Passenger {
 public:
-    FirstClassPassenger(const std::vector<int>& handLuggage, const std::vector<int>& luggage);
-    std::string getType() const override;
+  FirstClassPassenger(const std::vector<int> &handLuggage,
+                      const std::vector<int> &luggage);
+  std::string getType() const override;
 
-    int getMaxHandLuggagePieces() const override;
-    int getMaxHandLuggageTotalWeight() const override;
-    int getMaxLuggagePieces() const override;
-    int getMaxLuggageTotalWeight() const override;
+  int getMaxHandLuggagePieces() const override;
+  int getMaxHandLuggageTotalWeight() const override;
+  int getMaxLuggagePieces() const override;
+  int getMaxLuggageTotalWeight() const override;
 };
 
 #endif // PASSENGERS_HPP
