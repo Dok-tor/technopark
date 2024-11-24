@@ -6,64 +6,78 @@
 #include <string>
 #include <vector>
 
-// Подключаем ICU
-#include <unicode/ucnv.h>
-#include <unicode/unistr.h>
-#include <unicode/utf8.h>
-
-// Проверка валидности строки (кодировка UTF-8 или CP1251)
-bool isValidString(const std::string &str) {
-  // Проверяем на запрещённые символы
+// Проверка на запрещённые символы
+bool hasForbiddenCharacters(const std::string &str) {
   for (unsigned char c : str) {
     if (c == '\n' || c == '\r' || c == '\t' || c == '\0' || c == ' ') {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Проверка валидности UTF-8
+bool isValidUTF8(const std::string &str) {
+  size_t i = 0;
+  const size_t len = str.length();
+
+  while (i < len) {
+    unsigned char c = str[i];
+
+    if (c <= 0x7F) {
+      // 1-byte character
+      i += 1;
+    } else if ((c & 0xE0) == 0xC0) {
+      // 2-byte character
+      if (i + 1 >= len || (str[i + 1] & 0xC0) != 0x80 ||
+          (c & 0xFE) == 0xC0) { // Overlong encoding
+        return false;
+      }
+      i += 2;
+    } else if ((c & 0xF0) == 0xE0) {
+      // 3-byte character
+      if (i + 2 >= len || (str[i + 1] & 0xC0) != 0x80 ||
+          (str[i + 2] & 0xC0) != 0x80) {
+        return false;
+      }
+      i += 3;
+    } else if ((c & 0xF8) == 0xF0) {
+      // 4-byte character
+      if (i + 3 >= len || (str[i + 1] & 0xC0) != 0x80 ||
+          (str[i + 2] & 0xC0) != 0x80 || (str[i + 3] & 0xC0) != 0x80 ||
+          c > 0xF4) { // Maximum valid Unicode code point is U+10FFFF
+        return false;
+      }
+      i += 4;
+    } else {
       return false;
     }
   }
 
-  // Попытка декодировать как UTF-8
-  UErrorCode status = U_ZERO_ERROR;
-  UConverter *conv = ucnv_open("UTF-8", &status);
-  if (U_FAILURE(status)) {
+  return true;
+}
+
+// Проверка валидности CP1251 без символов 0x80 - 0xBF
+bool isValidCP1251(const std::string &str) {
+  for (unsigned char c : str) {
+    if (c >= 0x80 && c <= 0xBF) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Проверка валидности строки (кодировка UTF-8 или CP1251)
+bool isValidString(const std::string &str) {
+  if (hasForbiddenCharacters(str)) {
     return false;
   }
 
-  const char *source = str.c_str();
-  const char *sourceLimit = source + str.length();
-  UChar targetBuffer[256];
-  UChar *target = targetBuffer;
-  const UChar *targetLimit =
-      targetBuffer + sizeof(targetBuffer) / sizeof(UChar);
-
-  ucnv_toUnicode(conv, &target, targetLimit, &source, sourceLimit, nullptr,
-                 true, &status);
-  ucnv_close(conv);
-
-  if (U_SUCCESS(status) && source == sourceLimit) {
+  if (isValidUTF8(str)) {
     return true;
   }
 
-  // Попытка декодировать как CP1251
-  status = U_ZERO_ERROR;
-  conv = ucnv_open("windows-1251", &status);
-  if (U_FAILURE(status)) {
-    return false;
-  }
-
-  source = str.c_str();
-  sourceLimit = source + str.length();
-  target = targetBuffer;
-
-  ucnv_toUnicode(conv, &target, targetLimit, &source, sourceLimit, nullptr,
-                 true, &status);
-  ucnv_close(conv);
-
-  if (U_SUCCESS(status) && source == sourceLimit) {
-    // Дополнительно проверяем, нет ли символов в диапазоне 0x80 - 0xBF
-    for (unsigned char c : str) {
-      if (c >= 0x80 && c <= 0xBF) {
-        return false;
-      }
-    }
+  if (isValidCP1251(str)) {
     return true;
   }
 
