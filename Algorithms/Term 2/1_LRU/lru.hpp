@@ -7,7 +7,6 @@
 #include <list>
 #include <vector>
 
-// Реализация LRU-кэша
 template <typename KeyType, typename ValueType> class LRUCache {
 public:
   explicit LRUCache(size_t capacity, size_t max_bytes)
@@ -48,7 +47,7 @@ public:
       return false; // Даже после удаления элементов новый элемент не помещается
     }
 
-    // Удаляем необходимые элементы
+    // Удаляем элементы
     while (cache_list.size() > temp_size) {
       auto &last = cache_list.back();
       current_bytes -= item_size(last.first, last.second);
@@ -72,13 +71,10 @@ public:
     return true;
   }
 
-  // Размер кэша в элементах
   size_t size() const { return cache_list.size(); }
 
-  // Размер кэша в байтах
   size_t size_bytes() const { return current_bytes; }
 
-  // Очистка кэша
   void clear() {
     cache_list.clear();
     cache_map.clear();
@@ -90,10 +86,8 @@ private:
   size_t max_bytes;     // Максимальный размер в байтах
   size_t current_bytes; // Текущий размер в байтах
 
-  // Список для отслеживания порядка использования
   std::list<std::pair<KeyType, ValueType>> cache_list;
 
-  // Хэш-таблица для быстрого доступа к элементам
   HashTable<KeyType,
             typename std::list<std::pair<KeyType, ValueType>>::iterator>
       cache_map;

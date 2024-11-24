@@ -7,7 +7,6 @@
 #include <utility>
 #include <vector>
 
-// Реализация хэш-таблицы с открытой адресацией и линейным пробированием
 template <typename KeyType, typename ValueType,
           typename HashT = std::hash<KeyType>>
 class HashTable {
@@ -25,7 +24,6 @@ public:
           deleted(false) {}
   };
 
-  // Итератор для хэш-таблицы
   class iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
@@ -74,7 +72,6 @@ public:
     HashNode *end_ptr;
   };
 
-  // Константный итератор
   class const_iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
@@ -122,13 +119,11 @@ public:
     const HashNode *end_ptr;
   };
 
-  // Конструктор
   explicit HashTable(size_t capacity = initial_capacity)
       : num_elements(0), max_load_factor_(0.75f) {
     table.resize(capacity);
   }
 
-  // Итераторы
   iterator begin() { return iterator(&table[0], &table[0] + table.size()); }
 
   iterator end() {
@@ -143,39 +138,33 @@ public:
     return const_iterator(&table[0] + table.size(), &table[0] + table.size());
   }
 
-  // Проверка на пустоту
   bool empty() const { return num_elements == 0; }
 
-  // Количество элементов
   size_t size() const { return num_elements; }
 
-  // Очистка таблицы
   void clear() {
     table.clear();
     table.resize(initial_capacity);
     num_elements = 0;
   }
 
-  // Резервирование памяти
   void reserve(size_t new_capacity) {
     if (new_capacity > table.size()) {
       rehash(new_capacity);
     }
   }
 
-  // Фактор загрузки
   float load_factor() const {
     return static_cast<float>(num_elements) / table.size();
   }
 
-  // Максимальный фактор загрузки
   float max_load_factor() const { return max_load_factor_; }
 
   void max_load_factor(float ml) { max_load_factor_ = ml; }
 
-  // Оператор []
   ValueType &operator[](const KeyType &key) {
-    if (load_factor() > max_load_factor_) {
+    if (static_cast<float>(num_elements + 1) / table.size() >
+        max_load_factor_) {
       rehash();
     }
     size_t index = find_position(key);
@@ -186,7 +175,6 @@ public:
     return table[index].value;
   }
 
-  // Поиск элемента
   iterator find(const KeyType &key) {
     size_t index = find_position(key);
     if (table[index].occupied && !table[index].deleted) {
@@ -208,22 +196,10 @@ public:
     return (find(key) != end()) ? 1 : 0;
   }
 
-  // Вставка элемента
   std::pair<iterator, bool> insert(const std::pair<KeyType, ValueType> &pair) {
-    if (load_factor() > max_load_factor_) {
-      rehash();
-    }
-    size_t index = find_position(pair.first);
-    if (table[index].occupied && !table[index].deleted) {
-      return {iterator(&table[index], &table[0] + table.size()), false};
-    }
-    table[index] = HashNode(pair.first, pair.second, true);
-    ++num_elements;
-    return {iterator(&table[index], &table[0] + table.size()), true};
-  }
-
-  std::pair<iterator, bool> insert(std::pair<KeyType, ValueType> &&pair) {
-    if (load_factor() > max_load_factor_) {
+    if (static_cast<float>(num_elements + 1) / table.size() >
+            max_load_factor_ ||
+        num_elements == table.size()) {
       rehash();
     }
     size_t index = find_position(pair.first);
@@ -236,7 +212,22 @@ public:
     return {iterator(&table[index], &table[0] + table.size()), true};
   }
 
-  // Удаление элемента
+  std::pair<iterator, bool> insert(std::pair<KeyType, ValueType> &&pair) {
+    if (static_cast<float>(num_elements + 1) / table.size() >
+            max_load_factor_ ||
+        num_elements == table.size()) {
+      rehash();
+    }
+    size_t index = find_position(pair.first);
+    if (table[index].occupied && !table[index].deleted) {
+      return {iterator(&table[index], &table[0] + table.size()), false};
+    }
+    table[index] =
+        HashNode(std::move(pair.first), std::move(pair.second), true);
+    ++num_elements;
+    return {iterator(&table[index], &table[0] + table.size()), true};
+  }
+
   size_t erase(const KeyType &key) {
     size_t index = find_position(key);
     if (table[index].occupied && !table[index].deleted) {
@@ -280,7 +271,6 @@ private:
     return (first_deleted_index != table.size()) ? first_deleted_index : index;
   }
 
-  // Перехеширование таблицы
   void rehash(size_t new_capacity = 0) {
     size_t old_capacity = table.size();
     size_t capacity = new_capacity ? new_capacity : old_capacity * 2;
