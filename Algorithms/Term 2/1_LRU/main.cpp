@@ -25,27 +25,22 @@ bool isValidUTF8(const std::string &str) {
     unsigned char c = str[i];
 
     if (c <= 0x7F) {
-      // 1-byte character
       i += 1;
     } else if ((c & 0xE0) == 0xC0) {
-      // 2-byte character
-      if (i + 1 >= len || (str[i + 1] & 0xC0) != 0x80 ||
-          (c & 0xFE) == 0xC0) { // Overlong encoding
+      if (i + 1 >= len || (str[i + 1] & 0xC0) != 0x80 || (c & 0xFE) == 0xC0) {
         return false;
       }
       i += 2;
     } else if ((c & 0xF0) == 0xE0) {
-      // 3-byte character
       if (i + 2 >= len || (str[i + 1] & 0xC0) != 0x80 ||
           (str[i + 2] & 0xC0) != 0x80) {
         return false;
       }
       i += 3;
     } else if ((c & 0xF8) == 0xF0) {
-      // 4-byte character
       if (i + 3 >= len || (str[i + 1] & 0xC0) != 0x80 ||
           (str[i + 2] & 0xC0) != 0x80 || (str[i + 3] & 0xC0) != 0x80 ||
-          c > 0xF4) { // Maximum valid Unicode code point is U+10FFFF
+          c > 0xF4) {
         return false;
       }
       i += 4;
@@ -89,7 +84,6 @@ void processInput(const std::string &input,
                   LRUCache<std::string, std::vector<float>> &cache) {
   size_t tab_pos = input.find('\t');
   if (tab_pos != std::string::npos) {
-    // Строка типа (а): <q>\t<f1> <f2> <f3> ...
     std::string q = input.substr(0, tab_pos);
     std::string floats_str = input.substr(tab_pos + 1);
 
