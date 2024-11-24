@@ -12,61 +12,63 @@
 #include <unicode/utf8.h>
 
 // Проверка валидности строки (кодировка UTF-8 или CP1251)
-bool isValidString(const std::string& str) {
-    // Проверяем на запрещённые символы
-    for (unsigned char c : str) {
-        if (c == '\n' || c == '\r' || c == '\t' || c == '\0' || c == ' ') {
-            return false;
-        }
+bool isValidString(const std::string &str) {
+  // Проверяем на запрещённые символы
+  for (unsigned char c : str) {
+    if (c == '\n' || c == '\r' || c == '\t' || c == '\0' || c == ' ') {
+      return false;
     }
+  }
 
-    // Попытка декодировать как UTF-8
-    UErrorCode status = U_ZERO_ERROR;
-    UConverter* conv = ucnv_open("UTF-8", &status);
-    if (U_FAILURE(status)) {
-        return false;
-    }
-
-    const char* source = str.c_str();
-    const char* sourceLimit = source + str.length();
-    UChar targetBuffer[256];
-    UChar* target = targetBuffer;
-    const UChar* targetLimit = targetBuffer + sizeof(targetBuffer) / sizeof(UChar);
-
-    ucnv_toUnicode(conv, &target, targetLimit, &source, sourceLimit, nullptr, true, &status);
-    ucnv_close(conv);
-
-    if (U_SUCCESS(status) && source == sourceLimit) {
-        return true;
-    }
-
-    // Попытка декодировать как CP1251
-    status = U_ZERO_ERROR;
-    conv = ucnv_open("windows-1251", &status);
-    if (U_FAILURE(status)) {
-        return false;
-    }
-
-    source = str.c_str();
-    sourceLimit = source + str.length();
-    target = targetBuffer;
-
-    ucnv_toUnicode(conv, &target, targetLimit, &source, sourceLimit, nullptr, true, &status);
-    ucnv_close(conv);
-
-    if (U_SUCCESS(status) && source == sourceLimit) {
-        // Дополнительно проверяем, нет ли символов в диапазоне 0x80 - 0xBF
-        for (unsigned char c : str) {
-            if (c >= 0x80 && c <= 0xBF) {
-                return false;
-            }
-        }
-        return true;
-    }
-
+  // Попытка декодировать как UTF-8
+  UErrorCode status = U_ZERO_ERROR;
+  UConverter *conv = ucnv_open("UTF-8", &status);
+  if (U_FAILURE(status)) {
     return false;
-}
+  }
 
+  const char *source = str.c_str();
+  const char *sourceLimit = source + str.length();
+  UChar targetBuffer[256];
+  UChar *target = targetBuffer;
+  const UChar *targetLimit =
+      targetBuffer + sizeof(targetBuffer) / sizeof(UChar);
+
+  ucnv_toUnicode(conv, &target, targetLimit, &source, sourceLimit, nullptr,
+                 true, &status);
+  ucnv_close(conv);
+
+  if (U_SUCCESS(status) && source == sourceLimit) {
+    return true;
+  }
+
+  // Попытка декодировать как CP1251
+  status = U_ZERO_ERROR;
+  conv = ucnv_open("windows-1251", &status);
+  if (U_FAILURE(status)) {
+    return false;
+  }
+
+  source = str.c_str();
+  sourceLimit = source + str.length();
+  target = targetBuffer;
+
+  ucnv_toUnicode(conv, &target, targetLimit, &source, sourceLimit, nullptr,
+                 true, &status);
+  ucnv_close(conv);
+
+  if (U_SUCCESS(status) && source == sourceLimit) {
+    // Дополнительно проверяем, нет ли символов в диапазоне 0x80 - 0xBF
+    for (unsigned char c : str) {
+      if (c >= 0x80 && c <= 0xBF) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
 
 // Обработка входных данных
 void processInput(const std::string &input,

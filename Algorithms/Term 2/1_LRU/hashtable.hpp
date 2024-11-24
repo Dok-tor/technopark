@@ -174,17 +174,17 @@ public:
   void max_load_factor(float ml) { max_load_factor_ = ml; }
 
   // Оператор []
-  ValueType& operator[](const KeyType& key) {
+  ValueType &operator[](const KeyType &key) {
     if (load_factor() > max_load_factor_) {
-        rehash();
+      rehash();
     }
     size_t index = find_position(key);
     if (!table[index].occupied || table[index].deleted) {
-        table[index] = HashNode(key, ValueType(), true);
-        ++num_elements;
+      table[index] = HashNode(key, ValueType(), true);
+      ++num_elements;
     }
     return table[index].value;
-}
+  }
 
   // Поиск элемента
   iterator find(const KeyType &key) {
