@@ -5,19 +5,15 @@
 #include <vector>
 #include <cassert>
 
-// Boost.Fusion
 #include <boost/fusion/include/define_struct.hpp>
 #include <boost/fusion/include/is_sequence.hpp>
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/value_at.hpp>
 #include <boost/fusion/include/size.hpp>
 
-// nlohmann/json
 #include <nlohmann/json.hpp>
 
-/******************************************************************************
- * 1) Объявляем структуры
- ******************************************************************************/
+
 BOOST_FUSION_DEFINE_STRUCT(
     (pkg),
     MyStruct1,
@@ -54,7 +50,7 @@ BOOST_FUSION_DEFINE_STRUCT(
     (pkg),
     InvalidStruct1,
     (int, valid_int)
-    (double, unsupported_double) // double не поддерживается в текущей реализации
+    (double, unsupported_double) // double не поддерживается
 )
 
 BOOST_FUSION_DEFINE_STRUCT(
@@ -71,9 +67,9 @@ BOOST_FUSION_DEFINE_STRUCT(
     (std::vector<void*>, unsupported_void_ptr_vector) // std::vector<void*> не поддерживается
 );
 
-/******************************************************************************
- * 2) Метапрограммные утилиты для проверки типов
- ******************************************************************************/
+
+// Проверка типов
+
 template <typename T>
 struct IsFusionStruct : boost::fusion::traits::is_sequence<T> {};
 
@@ -86,9 +82,7 @@ struct IsStdVector<std::vector<U>> : std::true_type {};
 template <typename T>
 constexpr bool IsStdVector_v = IsStdVector<T>::value;
 
-/******************************************************************************
- * 3) Утилита для "статического цикла" [static_for]
- ******************************************************************************/
+// Статический цикл
 template <int Begin, int End>
 struct StaticFor
 {
@@ -107,9 +101,7 @@ struct StaticFor<End, End>
     static void run(const F&) { /* завершаем рекурсию */ }
 };
 
-/******************************************************************************
- * 4) Универсальные функции (де)сериализации одного поля
- ******************************************************************************/
+// Перегрузки сериализации и десериализации для одного поля для разных типов (определение ниже)
 using json = nlohmann::json;
 
 template <typename T>
@@ -124,9 +116,6 @@ void DeserializeField(const json& j, const std::string& fieldName, T& outVal);
 template <typename T>
 void DeserializeField(const json& j, const std::string& fieldName, std::vector<T>& outVal);
 
-/******************************************************************************
- * 5) Функции Serialize / Deserialize
- ******************************************************************************/
 template <typename FusionT>
 std::string Serialize(const FusionT& fusionObj)
 {
@@ -167,7 +156,6 @@ FusionT Deserialize(std::string_view jsonStr)
     }
 
     FusionT result{};
-    // Проходимся по индексам 0..N-1
     StaticFor<0, N>::run([&](auto iC)
     {
         constexpr int I = decltype(iC)::value;
@@ -181,9 +169,6 @@ FusionT Deserialize(std::string_view jsonStr)
     return result;
 }
 
-/******************************************************************************
- * 6) Реализация SerializeField
- ******************************************************************************/
 template <typename T>
 void SerializeField(json& j, const std::string& fieldName, const T& value)
 {
@@ -208,7 +193,7 @@ void SerializeField(json& j, const std::string& fieldName, const T& value)
     }
 }
 
-// vector<T>
+// Для vector<T>
 template <typename T>
 void SerializeField(json& j, const std::string& fieldName, const std::vector<T>& vec)
 {
@@ -222,9 +207,6 @@ void SerializeField(json& j, const std::string& fieldName, const std::vector<T>&
     j[fieldName] = arr;
 }
 
-/******************************************************************************
- * 7) Реализация DeserializeField
- ******************************************************************************/
 template <typename T>
 void DeserializeField(const json& j, const std::string& fieldName, T& outVal)
 {
@@ -266,7 +248,7 @@ void DeserializeField(const json& j, const std::string& fieldName, T& outVal)
     }
 }
 
-// vector<T>
+// Для vector<T>
 template <typename T>
 void DeserializeField(const json& j, const std::string& fieldName, std::vector<T>& outVal)
 {

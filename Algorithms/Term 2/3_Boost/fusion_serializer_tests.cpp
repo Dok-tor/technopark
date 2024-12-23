@@ -1,6 +1,3 @@
-/**********************************************************************************
- * 8) Юнит-тесты (упрощённый пример)
- **********************************************************************************/
 #include "fusion_serializer.hpp"
 #include <cassert>
 
@@ -44,7 +41,6 @@ int main() {
         ms3.some_str = "abcde";
         ms3.vals = {1, 2, 3};
 
-        // Из-за explicit-конструкторов делаем так:
         {
             MyStruct1 tmp1; tmp1.r0 = 1;
             MyStruct1 tmp2; tmp2.r0 = 2;
@@ -62,7 +58,6 @@ int main() {
             // Десериализация
             auto ms3_copy = Deserialize<MyStruct3>(jsonStr);
 
-            // Проверяем значения
             assert(ms3_copy.r1 == 123);
             assert(ms3_copy.some_str == "abcde");
             assert(ms3_copy.vals.size() == 3 && ms3_copy.vals[2] == 3);
